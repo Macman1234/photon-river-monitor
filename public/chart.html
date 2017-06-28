@@ -2,245 +2,28 @@
 
 <script src="js/Chart.min.js"></script>
 
-<link rel="stylesheet" href="css/bootstrap.min.css">
-
-<link rel="stylesheet" href="css/bootstrap-theme.min.css">
-
 <script src="js/jquery-3.1.1.min.js"></script>
 
+<link rel="stylesheet" href="css/bootstrap.min.css">
+<link rel="stylesheet" href="css/bootstrap-theme.min.css">
 <script src="js/bootstrap.min.js"></script>
 
 <script src="js/socket.io.js"></script>
 
-<script src="js/bootstrap-datetimepicker.min.js"></script>
+<script src="js/daterangepicker.js"></script>
 
-<link rel="stylesheet" href="css/bootstrap-datetimepicker.min.css">
+<link rel="stylesheet" href="css/daterangepicker.css">
 
-<script>
-    var timeFormat = 'Do YYYY, h:mm:ss a';
-    var labelsToUse = [];
-
-    function getParameterByName(name, url) {
-        if (!url) url = window.location.href;
-        name = name.replace(/[\[\]]/g, "\\$&");
-        var regex = new RegExp("[?&]" + name + "(=([^&#]*)|&|#|$)"),
-            results = regex.exec(url);
-        if (!results) return null;
-        if (!results[2]) return '';
-        return decodeURIComponent(results[2].replace(/\+/g, " "));
-    }
-    var chartType = getParameterByName('type');
-
-    var color = Chart.helpers.color;
-
-    $(document).ready(function() {
-        //console.log(chartType);
-        updateBar();
-        $("#laser").on('click', function() {
-            //console.log("laser selector clicked");
-            chartType = 'laser';
-            updateChart();
-        });
-        $("#rotary").on('click', function() {
-            //console.log("rotary selector clicked");
-            chartType = 'rotary';
-            updateChart();
-        });
-        $("#temp").on('click', function() {
-            //console.log("tempurature selector clicked");
-            chartType = 'temp';
-            updateChart();
-        });
-        $("#batt").on('click', function() {
-            //console.log("battery selector clicked");
-            chartType = 'batt';
-
-            updateChart();
-        });
-        $("#multi").on('click', function() {
-            //console.log("multiple selector clicked");
-            chartType = 'multi';
-            updateChart();
-        });
-        var ctx = document.getElementById('myChart').getContext('2d');
-        var myChart = new Chart(ctx, {
-            type: 'line',
-            data: {
-                labels: [0],
-                datasets: [{
-                    fill: false,
-                    label: "",
-                    data: [0],
-                    backgroundColor: '#ff6384',
-                    borderColor: '#ff6384'
-                }]
-            },
-            options: {
-                scales: {
-                    xAxes: [{
-                        type: "time",
-                        time: {
-                            format: timeFormat,
-                            // round: 'day'
-                            tooltipFormat: 'll HH:mm'
-                        },
-                        scaleLabel: {
-                            display: true,
-                            labelString: 'Date'
-                        }
-                    }, ],
-                    yAxes: [{
-                        scaleLabel: {
-                            display: true,
-                            labelString: ""
-                        }
-                    }]
-                },
-            }
-        });
-        //console.log(myChart.data.datasets[0].data);
-        var chartData = {
-            laser: {
-                data: [],
-                times: []
-            },
-            rotary: {
-                data: [],
-                times: []
-            },
-            temp: {
-                data: [],
-                times: []
-            },
-            batt: {
-                data: [],
-                times: []
-            }
-        }
-        var socket = io.connect();
-        socket.on('connect', function() {
-            socket.on('begin', function(data) {
-
-                updateData(data, updateChart);
-                //console.log(labels);
-                //console.log(datapoints);
-            });
-
-            socket.on('update', function(msg) {
-                console.log('an update happened')
-            });
-        });
-
-        function updateData(msg, callback) {
-            msg.pop();
-            msg.forEach(function(element) {
-                //console.log("--->" + element + "<----");
-                var vj = null; //vj for "valid json"
-                try {
-                    vj = JSON.parse(element);
-                } catch (err) {
-
-                }
-
-                if (vj && vj.name === 'distance') {
-                    var time = moment(vj.published_at);
-                    //console.log(time)
-                    chartData.laser.times.push(time);
-                    chartData.laser.data.push(vj.data);
-                }
-                if (vj && vj.name === 'batteryLevel') {
-                    var time = moment(vj.published_at);
-                    //console.log(time)
-                    chartData.batt.times.push(time);
-                    chartData.batt.data.push(vj.data);
-                }
-                if (vj && vj.name === 'Temperature') {
-                    var time = moment(vj.published_at);
-                    //console.log(time)
-                    chartData.temp.times.push(time);
-                    chartData.temp.data.push(vj.data);
-                }
-                if (vj && vj.name === 'rotary') {
-                    var time = moment(vj.published_at);
-                    //console.log(time)
-                    chartData.rotary.times.push(time);
-                    chartData.rotary.data.push(vj.data);
-                }
-            });
-            callback();
-        }
-
-        function updateBar() {
-            $('.selector').each(function(index) {
-                //console.log(index + ": " + $(this).text());
-                if ($(this).hasClass('active') && $(this).children().attr('id') !== chartType) {
-                    $(this).removeClass('active');
-                } else if (!$(this).hasClass('active') && $(this).children().attr('id') === chartType) {
-                    $(this).addClass('active');
-                }
-            });
-        }
-
-        function updateChart() {
-            updateBar();
-            if (chartType === 'laser') {
-                chartData.current = chartData.laser;
-                labelsToUse = ['distance', 'inches from top of sensor']
-            }
-            if (chartType === 'batt') {
-                chartData.current = chartData.batt;
-                labelsToUse = ['battery level', 'volts']
-            }
-            if (chartType === 'temp') {
-                chartData.current = chartData.temp;
-                labelsToUse = ['tempurature', 'degrees F']
-            }
-            if (chartType === 'rotary') {
-                chartData.current = chartData.rotary;
-                labelsToUse = ['rotary sensor', 'angle in degrees']
-            }
-            myChart.data.labels = chartData.current.times;
-            myChart.data.datasets[0].data = chartData.current.data;
-            myChart.data.datasets[0].label = labelsToUse[0];
-            myChart.options.scales.yAxes[0].scaleLabel.labelString = labelsToUse[1];
-            console.log('updating chart');
-            myChart.update();
-            $("#loading").remove();
-        }
-    })
-</script>
+<script src='chartfile.js'></script>
 
 <style>
-    p {
-        font-size: 18px;
-        text-align: justify;
-    }
-
     body {
         padding: 25px 40px 25px 40px;
     }
 </style>
 
 <body>
-    <!-- <div class="container">
-        <div class="row">
-            <div class='col-sm-6'>
-                <div class="form-group">
-                    <div class='input-group date' id='datetimepicker1'>
-                        <input type='text' class="form-control" />
-                        <span class="input-group-addon">
-                        <span class="glyphicon glyphicon-calendar"></span>
-                        </span>
-                    </div>
-                </div>
-            </div>
-            <script type="text/javascript">
-                $(function() {
-                    $('#datetimepicker1').datetimepicker();
-                });
-            </script>
-        </div>
-    </div> -->
+
     <nav class="navbar navbar-default">
         <div class="container-fluid">
             <div class="navbar-header">
@@ -265,6 +48,18 @@
                             <li role="separator" class="divider"></li>
                             <li class="selector"><a id='multi' href="#">Test with multiple</a></li>
                         </ul>
+                    </li>
+                </ul>
+                <ul class="nav navbar-nav navbar-right">
+                    <li>
+                        <p class="navbar-text">Range:</p>
+                    </li>
+                    <li>
+                        <form class="navbar-form">
+                            <div class="form-group">
+                                <input type="text" class="form-control" name="daterange" value="">
+                            </div>
+                        </form>
                     </li>
                 </ul>
             </div>
