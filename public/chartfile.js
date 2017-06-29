@@ -14,15 +14,13 @@ var chartType = getParameterByName('type');
 
 var color = Chart.helpers.color;
 
-$(document).ready(function() {
+var currentmin;
+var currentmax;
 
-    /*$('input[name="daterange"]').daterangepicker({
-        timePicker: true,
-        timePickerIncrement: 30,
-        locale: {
-            format: 'MM/DD/YYYY h:mm A'
-        }
-    }); */
+$(document).ready(function() {
+    $(function() {
+        $('#datetimepicker1').datetimepicker();
+    });
 
     updateBar();
     $("#laser").on('click', function() {
@@ -144,7 +142,6 @@ $(document).ready(function() {
 
     function updateBar() {
         $('.selector').each(function(index) {
-            //console.log(index + ": " + $(this).text());
             if ($(this).hasClass('active') && $(this).children().attr('id') !== chartType) {
                 $(this).removeClass('active');
             } else if (!$(this).hasClass('active') && $(this).children().attr('id') === chartType) {
@@ -171,11 +168,14 @@ $(document).ready(function() {
             chartData.current = chartData.rotary;
             labelsToUse = ['rotary sensor', 'angle in degrees'];
         }
+        currentminallowed = moment.min(chartData.current.times);
+        currentmaxallowed = moment.max(chartData.current.times);
+
+
         myChart.data.labels = chartData.current.times;
         myChart.data.datasets[0].data = chartData.current.data;
         myChart.data.datasets[0].label = labelsToUse[0];
         myChart.options.scales.yAxes[0].scaleLabel.labelString = labelsToUse[1];
-        console.log('updating chart');
         myChart.update();
         $("#loading").remove();
     }
