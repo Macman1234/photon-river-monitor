@@ -26,7 +26,6 @@
 </style>
 
 <body>
-
     <nav class="navbar navbar-default">
         <div class="container-fluid">
             <div class="navbar-header">
@@ -59,7 +58,7 @@
                     </li>
                     <li>
                         <form class="navbar-form">
-                            <div class='input-group date' id='datetimepicker1'>
+                            <div class='input-group date' id='minpicker'>
                                 <input type='text' class="form-control" />
                                 <span class="input-group-addon">
                                     <span class="glyphicon glyphicon-calendar"></span>
@@ -72,7 +71,7 @@
                     </li>
                     <li>
                         <form class="navbar-form">
-                            <div class='input-group date' id='datetimepicker2'>
+                            <div class='input-group date' id='maxpicker'>
                                 <input type='text' class="form-control" />
                                 <span class="input-group-addon">
                                     <span class="glyphicon glyphicon-calendar"></span>
@@ -86,6 +85,9 @@
         </div>
         <!-- /.container-fluid -->
     </nav>
+    <div id="alerter">
+
+    </div>
     <div class="chartholder">
         <img id='loading' src="images/30.gif">
         <canvas id="myChart"></canvas>

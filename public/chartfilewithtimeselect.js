@@ -1,3 +1,4 @@
+var timeFormat = 'Do YYYY, h:mm:ss a';
 var labelsToUse = [];
 
 function getParameterByName(name, url) {
@@ -13,37 +14,29 @@ var chartType = getParameterByName('type');
 
 var color = Chart.helpers.color;
 
-var alert = '<div class="alert alert-warning alert-dismissible" role="alert"><button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button><strong>Warning!</strong> The value you selected was out of range.</div>';
-
 var pickedmin;
 var pickedmax;
 
+var datamin;
+var datamax;
 var isfirst = true;
 
 $(document).ready(function() {
-    $('#minpicker').datetimepicker();
-    $('#maxpicker').datetimepicker({
-        useCurrent: false //Important! See issue #1075
-    });
-    $("#minpicker").on("dp.change", function(e) {
-        $('#maxpicker').data("DateTimePicker").minDate(e.date);
-        pickedmin = e.date;
-        if (!isfirst) {
+    $(function() {
+        $('#minpicker').datetimepicker();
+        $('#maxpicker').datetimepicker({
+            useCurrent: false //Important! See issue #1075
+        });
+        $("#minpicker").on("dp.change", function(e) {
+            $('#maxpicker').data("DateTimePicker").minDate(e.date);
+            pickedmin = e.date;
             updateChart();
-        }
-    });
-    $("#maxpicker").on("dp.change", function(e) {
-        $('#minpicker').data("DateTimePicker").maxDate(e.date);
-        pickedmax = e.date;
-        if (!isfirst) {
+        });
+        $("#maxpicker").on("dp.change", function(e) {
+            $('#minpicker').data("DateTimePicker").maxDate(e.date);
+            pickedmax = e.date;
             updateChart();
-        }
-    });
-    $("#minpicker").on("dp.error", function(e) {
-        $("#alerter").append(alert);
-    });
-    $("#maxpicker").on("dp.error", function(e) {
-        $("#alerter").append(alert);
+        });
     });
 
     updateBar();
@@ -85,8 +78,8 @@ $(document).ready(function() {
                 xAxes: [{
                     type: "time",
                     time: {
-                        format: 'MM/DD/YYYY hh:mm a',
-                        tooltipFormat: 'll hh:mm a'
+                        format: timeFormat,
+                        tooltipFormat: 'll HH:mm'
                     },
                     scaleLabel: {
                         display: true,
@@ -192,19 +185,25 @@ $(document).ready(function() {
             chartData.current = chartData.rotary;
             labelsToUse = ['rotary sensor', 'angle in degrees'];
         }
+        datamin = moment.min(chartData.current.times);
+        datamax = moment.max(chartData.current.times);
+
+        $('#minpicker').data("DateTimePicker").minDate(datamin);
+        $('#maxpicker').data("DateTimePicker").maxDate(datamax);
 
         if (isfirst) {
-            $('#minpicker').data("DateTimePicker").date(moment.min(chartData.current.times));
-            $('#maxpicker').data("DateTimePicker").date(moment.max(chartData.current.times));
+            $('#minpicker').data("DateTimePicker").date(datamin);
+            $('#maxpicker').data("DateTimePicker").date(datamax);
             $("#loading").remove();
             isfirst = false;
         }
-
-        $('#minpicker').data("DateTimePicker").minDate(moment.min(chartData.current.times).subtract(1, 'minutes'));
-        $('#maxpicker').data("DateTimePicker").maxDate(moment.max(chartData.current.times));
-
-        myChart.options.scales.xAxes[0].time.min = pickedmin;
-        myChart.options.scales.xAxes[0].time.max = pickedmax;
+        chartData.current.times.forEach(function(element, index) {
+            if (element.isBefore(pickedmin) || element.isAfter(pickedmax)) {
+                chartData.current.times.splice(index, 1);
+                chartData.current.data.splice(index, 1);
+                console.log('deleted');
+            }
+        });
 
         myChart.data.labels = chartData.current.times;
         myChart.data.datasets[0].data = chartData.current.data;

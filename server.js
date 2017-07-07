@@ -44,7 +44,9 @@ particle.login({
         }).catch(err => {
             throw err;
         });
-    });
+    }).catch(err => {
+    throw err;
+});
 server.listen(process.env.PORT || 8080, process.env.IP || "0.0.0.0", function() {
     var addr = server.address();
     console.log("Server listening at", addr.address + ":" + addr.port);
