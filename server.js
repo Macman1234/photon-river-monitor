@@ -7,19 +7,16 @@ var socketio = require('socket.io');
 var bodyParser = require('body-parser');
 var keys = require('./keys.js');
 
-var router = express();
-var server = http.createServer(router);
-var io = socketio.listen(server);
+var app = express();
+var server = http.Server(app);
+var io = socketio(server);
 
 var Particle = require('particle-api-js');
 
-router.use(express.static(path.resolve(__dirname, 'public')));
-router.use(bodyParser.json());
+app.use(express.static(path.resolve(__dirname, 'public')));
+app.use(bodyParser.json());
 
-var callback = function() {
-    console.log('Succesfully logged in!');
-};
-
+server.listen('8080');
 
 var particle = new Particle();
 var token;
@@ -37,8 +34,20 @@ particle.login({
             //console.log("logged in!");
             stream.on('event', function(data) {
                 console.log("Event: %j", data);
-                fs.appendFile('/all-logs.log', JSON.parse(data), (err) => {
+                fs.readFile(__dirname + '/log.json', (err, data) => {
                     if (err) throw err;
+                    try {
+                        // parse and return json to callback
+                        var json = JSON.parse(data);
+                        console.log(json.length);
+                        json.push('test');
+                        fs.writeFile(__dirname + '/log.json', JSON.stringify(json), (err, data) => {
+                            if (err) throw err;
+                        });
+                    } catch (ex) {
+                        // catch JSON parsing errors so your app doesn't crash
+                        throw err;
+                    }
                 });
             });
         }).catch(err => {
@@ -47,22 +56,27 @@ particle.login({
     }).catch(err => {
     throw err;
 });
-server.listen(process.env.PORT || 8080, process.env.IP || "0.0.0.0", function() {
-    var addr = server.address();
-    console.log("Server listening at", addr.address + ":" + addr.port);
-});
-io.on('connection', function(socket) {
-    fs.readFile(__dirname + '/all-logs.log', (err, data) => {
+
+app.get('/data', function(req, res) {
+    fs.readFile(__dirname + '/log.json', (err, data) => {
         if (err) throw err;
-        io.sockets.emit('begin', data.toString().split('\n'));
+        res.send(data);
+        //console.log(data);
+    });
+});
+
+io.on('connection', function(socket) {
+    fs.readFile(__dirname + '/log.json', (err, data) => {
+        if (err) throw err;
+        io.sockets.emit('begin', data.toString());
         //console.log("socket connected");
     });
 });
 
-fs.watch(__dirname + '/all-logs.log', (type, name) => {
-    fs.readFile(__dirname + '/all-logs.log', (err, data) => {
+fs.watch(__dirname + '/log.json', (type, name) => {
+    fs.readFile(__dirname + '/log.json', (err, data) => {
         if (err) throw err;
-        io.sockets.emit('update', data.toString().split('\n'));
+        io.sockets.emit('update', data.toString());
         //console.log("socket updated");
     });
 });

@@ -76,8 +76,8 @@ $(document).ready(function() {
                 fill: false,
                 label: "",
                 data: [0],
-                backgroundColor: '#ff6384',
-                borderColor: '#ff6384'
+                backgroundColor: '#1375d0',
+                borderColor: '#1375d0'
             }]
         },
         options: {
@@ -125,6 +125,8 @@ $(document).ready(function() {
     var socket = io.connect();
     socket.on('connect', function() {
         socket.on('begin', function(data) {
+            console.log(data);
+            data = JSON.parse(data);
             updateData(data, updateChart);
         });
 
@@ -134,31 +136,24 @@ $(document).ready(function() {
     });
 
     function updateData(msg, callback) {
-        msg.pop();
         msg.forEach(function(element) {
             //console.log("--->" + element + "<----");
-            var vj = null; //vj for "valid json"
-            try {
-                vj = JSON.parse(element);
-            } catch (err) {
 
+            if (element && element.name === 'distance') {
+                chartData.laser.times.push(moment(element.published_at));
+                chartData.laser.data.push(element.data);
             }
-
-            if (vj && vj.name === 'distance') {
-                chartData.laser.times.push(moment(vj.published_at));
-                chartData.laser.data.push(vj.data);
+            if (element && element.name === 'batteryLevel') {
+                chartData.batt.times.push(moment(element.published_at));
+                chartData.batt.data.push(element.data);
             }
-            if (vj && vj.name === 'batteryLevel') {
-                chartData.batt.times.push(moment(vj.published_at));
-                chartData.batt.data.push(vj.data);
+            if (element && element.name === 'Temperature') {
+                chartData.temp.times.push(moment(element.published_at));
+                chartData.temp.data.push(element.data);
             }
-            if (vj && vj.name === 'Temperature') {
-                chartData.temp.times.push(moment(vj.published_at));
-                chartData.temp.data.push(vj.data);
-            }
-            if (vj && vj.name === 'rotary') {
-                chartData.rotary.times.push(moment(vj.published_at));
-                chartData.rotary.data.push(vj.data);
+            if (element && element.name === 'rotary') {
+                chartData.rotary.times.push(moment(element.published_at));
+                chartData.rotary.data.push(element.data);
             }
         });
         callback();
@@ -179,24 +174,32 @@ $(document).ready(function() {
         if (chartType === 'laser') {
             chartData.current = chartData.laser;
             labelsToUse = ['distance', 'inches from top of sensor'];
+            myChart.data.datasets[0].backgroundColor = '#4A5CA5';
+            myChart.data.datasets[0].borderColor = '#4A5CA5';
         }
         if (chartType === 'batt') {
             chartData.current = chartData.batt;
             labelsToUse = ['battery level', 'volts'];
+            myChart.data.datasets[0].backgroundColor = '#F3A712';
+            myChart.data.datasets[0].borderColor = '#F3A712';
         }
         if (chartType === 'temp') {
             chartData.current = chartData.temp;
             labelsToUse = ['tempurature', 'degrees F'];
+            myChart.data.datasets[0].backgroundColor = '#E4572E';
+            myChart.data.datasets[0].borderColor = '#E4572E';
         }
         if (chartType === 'rotary') {
             chartData.current = chartData.rotary;
             labelsToUse = ['rotary sensor', 'angle in degrees'];
+            myChart.data.datasets[0].backgroundColor = '#4A5CA5';
+            myChart.data.datasets[0].borderColor = '#4A5CA5';
         }
 
         if (isfirst) {
             $('#minpicker').data("DateTimePicker").date(moment.min(chartData.current.times));
             $('#maxpicker').data("DateTimePicker").date(moment.max(chartData.current.times));
-            $("#loading").remove();
+            $("#chartholder").removeClass("loading");
             isfirst = false;
         }
 

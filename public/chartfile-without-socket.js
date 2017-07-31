@@ -1,4 +1,3 @@
-var timeFormat = 'Do YYYY, h:mm:ss a';
 var labelsToUse = [];
 
 function getParameterByName(name, url) {
@@ -14,29 +13,41 @@ var chartType = getParameterByName('type');
 
 var color = Chart.helpers.color;
 
+var alert = '<div class="alert alert-warning alert-dismissible" role="alert"><button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button><strong>Warning!</strong> The value you selected was out of range.</div>';
+
 var pickedmin;
 var pickedmax;
 
-var datamin;
-var datamax;
 var isfirst = true;
 
 $(document).ready(function() {
-    $(function() {
-        $('#minpicker').datetimepicker();
-        $('#maxpicker').datetimepicker({
-            useCurrent: false //Important! See issue #1075
-        });
-        $("#minpicker").on("dp.change", function(e) {
-            $('#maxpicker').data("DateTimePicker").minDate(e.date);
-            pickedmin = e.date;
+    $.getJSON("data", function(data) {
+        updateData(data, updateChart);
+    });
+
+    $('#minpicker').datetimepicker();
+    $('#maxpicker').datetimepicker({
+        useCurrent: false //Important! See issue #1075
+    });
+    $("#minpicker").on("dp.change", function(e) {
+        $('#maxpicker').data("DateTimePicker").minDate(e.date);
+        pickedmin = e.date;
+        if (!isfirst) {
             updateChart();
-        });
-        $("#maxpicker").on("dp.change", function(e) {
-            $('#minpicker').data("DateTimePicker").maxDate(e.date);
-            pickedmax = e.date;
+        }
+    });
+    $("#maxpicker").on("dp.change", function(e) {
+        $('#minpicker').data("DateTimePicker").maxDate(e.date);
+        pickedmax = e.date;
+        if (!isfirst) {
             updateChart();
-        });
+        }
+    });
+    $("#minpicker").on("dp.error", function(e) {
+        $("#alerter").append(alert);
+    });
+    $("#maxpicker").on("dp.error", function(e) {
+        $("#alerter").append(alert);
     });
 
     updateBar();
@@ -69,8 +80,8 @@ $(document).ready(function() {
                 fill: false,
                 label: "",
                 data: [0],
-                backgroundColor: '#ff6384',
-                borderColor: '#ff6384'
+                backgroundColor: '#1375d0',
+                borderColor: '#1375d0'
             }]
         },
         options: {
@@ -78,8 +89,8 @@ $(document).ready(function() {
                 xAxes: [{
                     type: "time",
                     time: {
-                        format: timeFormat,
-                        tooltipFormat: 'll HH:mm'
+                        format: 'MM/DD/YYYY hh:mm a',
+                        tooltipFormat: 'll hh:mm a'
                     },
                     scaleLabel: {
                         display: true,
@@ -115,43 +126,25 @@ $(document).ready(function() {
         }
     };
 
-    var socket = io.connect();
-    socket.on('connect', function() {
-        socket.on('begin', function(data) {
-            updateData(data, updateChart);
-        });
-
-        socket.on('update', function(msg) {
-            console.log('an update happened');
-        });
-    });
-
     function updateData(msg, callback) {
-        msg.pop();
         msg.forEach(function(element) {
             //console.log("--->" + element + "<----");
-            var vj = null; //vj for "valid json"
-            try {
-                vj = JSON.parse(element);
-            } catch (err) {
 
+            if (element && element.name === 'distance') {
+                chartData.laser.times.push(moment(element.published_at));
+                chartData.laser.data.push(element.data);
             }
-
-            if (vj && vj.name === 'distance') {
-                chartData.laser.times.push(moment(vj.published_at));
-                chartData.laser.data.push(vj.data);
+            if (element && element.name === 'batteryLevel') {
+                chartData.batt.times.push(moment(element.published_at));
+                chartData.batt.data.push(element.data);
             }
-            if (vj && vj.name === 'batteryLevel') {
-                chartData.batt.times.push(moment(vj.published_at));
-                chartData.batt.data.push(vj.data);
+            if (element && element.name === 'Temperature') {
+                chartData.temp.times.push(moment(element.published_at));
+                chartData.temp.data.push(element.data);
             }
-            if (vj && vj.name === 'Temperature') {
-                chartData.temp.times.push(moment(vj.published_at));
-                chartData.temp.data.push(vj.data);
-            }
-            if (vj && vj.name === 'rotary') {
-                chartData.rotary.times.push(moment(vj.published_at));
-                chartData.rotary.data.push(vj.data);
+            if (element && element.name === 'rotary') {
+                chartData.rotary.times.push(moment(element.published_at));
+                chartData.rotary.data.push(element.data);
             }
         });
         callback();
@@ -172,38 +165,40 @@ $(document).ready(function() {
         if (chartType === 'laser') {
             chartData.current = chartData.laser;
             labelsToUse = ['distance', 'inches from top of sensor'];
+            myChart.data.datasets[0].backgroundColor = '#4A5CA5';
+            myChart.data.datasets[0].borderColor = '#4A5CA5';
         }
         if (chartType === 'batt') {
             chartData.current = chartData.batt;
             labelsToUse = ['battery level', 'volts'];
+            myChart.data.datasets[0].backgroundColor = '#F3A712';
+            myChart.data.datasets[0].borderColor = '#F3A712';
         }
         if (chartType === 'temp') {
             chartData.current = chartData.temp;
             labelsToUse = ['tempurature', 'degrees F'];
+            myChart.data.datasets[0].backgroundColor = '#E4572E';
+            myChart.data.datasets[0].borderColor = '#E4572E';
         }
         if (chartType === 'rotary') {
             chartData.current = chartData.rotary;
             labelsToUse = ['rotary sensor', 'angle in degrees'];
+            myChart.data.datasets[0].backgroundColor = '#4A5CA5';
+            myChart.data.datasets[0].borderColor = '#4A5CA5';
         }
-        datamin = moment.min(chartData.current.times);
-        datamax = moment.max(chartData.current.times);
-
-        $('#minpicker').data("DateTimePicker").minDate(datamin);
-        $('#maxpicker').data("DateTimePicker").maxDate(datamax);
 
         if (isfirst) {
-            $('#minpicker').data("DateTimePicker").date(datamin);
-            $('#maxpicker').data("DateTimePicker").date(datamax);
+            $('#minpicker').data("DateTimePicker").date(moment.min(chartData.current.times));
+            $('#maxpicker').data("DateTimePicker").date(moment.max(chartData.current.times));
             $("#loading").remove();
             isfirst = false;
         }
-        chartData.current.times.forEach(function(element, index) {
-            if (element.isBefore(pickedmin) || element.isAfter(pickedmax)) {
-                chartData.current.times.splice(index, 1);
-                chartData.current.data.splice(index, 1);
-                console.log('deleted');
-            }
-        });
+
+        $('#minpicker').data("DateTimePicker").minDate(moment.min(chartData.current.times).subtract(1, 'minutes'));
+        $('#maxpicker').data("DateTimePicker").maxDate(moment.max(chartData.current.times));
+
+        myChart.options.scales.xAxes[0].time.min = pickedmin;
+        myChart.options.scales.xAxes[0].time.max = pickedmax;
 
         myChart.data.labels = chartData.current.times;
         myChart.data.datasets[0].data = chartData.current.data;
