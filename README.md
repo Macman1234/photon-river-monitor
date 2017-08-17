@@ -1,3 +1,3 @@
-# Powwow River Measuring Station!
-I'm bad at markdown.
-I have no idea what to put here
+# Powwow River Measuring Station
+
+still in development, will update this later.

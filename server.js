@@ -34,13 +34,13 @@ particle.login({
             //console.log("logged in!");
             stream.on('event', function(data) {
                 console.log("Event: %j", data);
-                fs.readFile(__dirname + '/log.json', (err, data) => {
+                fs.readFile(__dirname + '/log.json', (err, file) => {
                     if (err) throw err;
                     try {
                         // parse and return json to callback
-                        var json = JSON.parse(data);
-                        console.log(json.length);
-                        json.push('test');
+                        var json = JSON.parse(file);
+                        //console.log(json.length);
+                        json.push(data);
                         fs.writeFile(__dirname + '/log.json', JSON.stringify(json), (err, data) => {
                             if (err) throw err;
                         });

@@ -11,9 +11,7 @@ function getParameterByName(name, url) {
 }
 var chartType = getParameterByName('type');
 
-var color = Chart.helpers.color;
-
-var alert = '<div class="alert alert-warning alert-dismissible" role="alert"><button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button><strong>Warning!</strong> The value you selected was out of range.</div>';
+var alert = '<div class="alert alert-warning alert-dismissible fade in" role="alert"><button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button><strong>Warning!</strong> The value you selected was out of range.</div>';
 
 var pickedmin;
 var pickedmax;
@@ -107,7 +105,7 @@ $(document).ready(function() {
         }
     });
 
-    var chartData = {
+    var blankDataFormat = {
         laser: {
             data: [],
             times: []
@@ -125,6 +123,7 @@ $(document).ready(function() {
             times: []
         }
     };
+    var chartData = blankDataFormat;
 
     function updateData(msg, callback) {
         msg.forEach(function(element) {
@@ -146,6 +145,7 @@ $(document).ready(function() {
                 chartData.rotary.times.push(moment(element.published_at));
                 chartData.rotary.data.push(element.data);
             }
+
         });
         callback();
     }
@@ -205,6 +205,5 @@ $(document).ready(function() {
         myChart.data.datasets[0].label = labelsToUse[0];
         myChart.options.scales.yAxes[0].scaleLabel.labelString = labelsToUse[1];
         myChart.update();
-        console.log('chart updated');
     }
 });
