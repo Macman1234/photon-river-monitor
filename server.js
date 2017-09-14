@@ -28,55 +28,58 @@ particle.login({
     function(data) {
         token = data.body.access_token;
         particle.getEventStream({
-            deviceId: '4c0032000951343334363138',
+            deviceId: '4f002e001951353338363036',
             auth: token
         }).then(function(stream) {
-            //console.log("logged in!");
             stream.on('event', function(data) {
                 console.log("Event: %j", data);
-                fs.readFile(__dirname + '/log.json', (err, file) => {
-                    if (err) throw err;
-                    try {
-                        // parse and return json to callback
-                        var json = JSON.parse(file);
-                        //console.log(json.length);
-                        json.push(data);
-                        fs.writeFile(__dirname + '/log.json', JSON.stringify(json), (err, data) => {
-                            if (err) throw err;
-                        });
+                try {
+               //        json = JSON.parse(data);
+  		       fs.appendFileSync(__dirname + '/log.txt', JSON.stringify(data) + "\n");
                     } catch (ex) {
                         // catch JSON parsing errors so your app doesn't crash
-                        throw err;
+console.log(ex);
                     }
                 });
-            });
-        }).catch(err => {
-            throw err;
-        });
+	});
     }).catch(err => {
     throw err;
 });
 
 app.get('/data', function(req, res) {
-    fs.readFile(__dirname + '/log.json', (err, data) => {
-        if (err) throw err;
-        res.send(data);
-        //console.log(data);
-    });
+	var array = fs.readFileSync(__dirname + '/log.txt').toString().split("\n");
+        var allData = [];
+        for (i in array)
+        {
+           try {
+                                json = JSON.parse(array[i]);
+			allData.push(json);
+           } catch (ex) {
+                        // catch JSON parsing errors so your app doesn't crash
+                    }
+       }
+        res.send(allData);
 });
 
 io.on('connection', function(socket) {
-    fs.readFile(__dirname + '/log.json', (err, data) => {
+    fs.readFile(__dirname + '/log.txt', (err, data) => {
         if (err) throw err;
         io.sockets.emit('begin', data.toString());
         //console.log("socket connected");
     });
 });
 
-fs.watch(__dirname + '/log.json', (type, name) => {
-    fs.readFile(__dirname + '/log.json', (err, data) => {
+
+try  {
+fs.watch(__dirname + '/log.txt', (type, name) => {
+    fs.readFile(__dirname + '/log.txt', (err, data) => {
         if (err) throw err;
         io.sockets.emit('update', data.toString());
         //console.log("socket updated");
     });
 });
+}
+catch (ex)
+{
+
+}

@@ -138,8 +138,11 @@ $(document).ready(function() {
                 chartData.batt.data.push(element.data);
             }
             if (element && element.name === 'Temperature') {
-                chartData.temp.times.push(moment(element.published_at));
-                chartData.temp.data.push(element.data);
+		if (element.data > 10 && element.data < 100)
+                {
+                  chartData.temp.times.push(moment(element.published_at));
+                  chartData.temp.data.push(element.data);
+  		}
             }
             if (element && element.name === 'rotary') {
                 chartData.rotary.times.push(moment(element.published_at));
