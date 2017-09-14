@@ -30,72 +30,83 @@
 
 <style>
     body {
-        padding: 25px 40px 25px 40px;
+        padding-top: 20px;
+        padding-bottom: 20px;
+    }
+
+    .navbar {
+        margin-bottom: 20px;
     }
 </style>
 
 <body>
-    <nav class="navbar navbar-default">
-        <div class="container-fluid">
-            <div class="navbar-header">
-                <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
-    <span class="sr-only">Toggle navigation</span>
-    <span class="icon-bar"></span>
-    <span class="icon-bar"></span>
-    <span class="icon-bar"></span>
-  </button>
-            </div>
-            <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
-                <ul class="nav navbar-nav">
-                    <li><a href="index.html">Home</a></li>
-                    <li><a href="http://www.codeandcircuit.org">Code and Circuit Website</a></li>
-                    <li class="dropdown active">
-                        <a href="chart0.html" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Statistics <span class="caret"></span></a>
-                        <ul class="dropdown-menu">
-                            <li class="selector"><a id="laser" href="#">Laser Distance Measure</a><span class="sr-only">(current)</span></li>
-                            <li class="selector"><a id='temp' href="#">Tempurature</a></li>
-                            <li class="selector"><a id='batt' href="#">Battery Level</a></li>
-                        </ul>
-                    </li>
-                </ul>
-                <ul class="nav navbar-nav navbar-right">
-                    <li>
-                        <p class="navbar-text">Range:</p>
-                    </li>
-                    <li>
-                        <form class="navbar-form">
-                            <div class='input-group date' id='minpicker'>
-                                <input type='text' class="form-control" />
-                                <span class="input-group-addon">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-12">
+                <nav class="navbar navbar-default" role="navigation">
+                    <div class="container-fluid">
+                        <div class="navbar-header">
+                            <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
+                    <span class="sr-only">Toggle navigation</span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+                        </div>
+                        <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+                            <ul class="nav navbar-nav">
+                                <li><a href="index.html">Home</a></li>
+                                <li><a href="http://www.codeandcircuit.org">Code and Circuit Website</a></li>
+                                <li class="dropdown active">
+                                    <a href="chart0.html" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Statistics <span class="caret"></span></a>
+                                    <ul class="dropdown-menu">
+                                        <li class="selector"><a id="laser" href="#">Laser Distance Measure</a><span class="sr-only">(current)</span></li>
+                                        <li class="selector"><a id='temp' href="#">Tempurature</a></li>
+                                        <li class="selector"><a id='batt' href="#">Battery Level</a></li>
+                                    </ul>
+                                </li>
+                            </ul>
+                            <ul class="nav navbar-nav navbar-right">
+                                <li>
+                                    <p class="navbar-text">Range:</p>
+                                </li>
+                                <li>
+                                    <form class="navbar-form">
+                                        <div class='input-group date' id='minpicker'>
+                                            <input type='text' class="form-control" />
+                                            <span class="input-group-addon">
                                     <span class="glyphicon glyphicon-calendar"></span>
-                                </span>
-                            </div>
-                        </form>
-                    </li>
-                    <li>
-                        <p class="navbar-text">―</p>
-                    </li>
-                    <li>
-                        <form class="navbar-form">
-                            <div class='input-group date' id='maxpicker'>
-                                <input type='text' class="form-control" />
-                                <span class="input-group-addon">
+                                            </span>
+                                        </div>
+                                    </form>
+                                </li>
+                                <li>
+                                    <p class="navbar-text">―</p>
+                                </li>
+                                <li>
+                                    <form class="navbar-form">
+                                        <div class='input-group date' id='maxpicker'>
+                                            <input type='text' class="form-control" />
+                                            <span class="input-group-addon">
                                     <span class="glyphicon glyphicon-calendar"></span>
-                                </span>
-                            </div>
-                        </form>
-                    </li>
-                </ul>
-            </div>
-            <!-- /.navbar-collapse -->
-        </div>
-        <!-- /.container-fluid -->
-    </nav>
-    <div id="alerter">
+                                            </span>
+                                        </div>
+                                    </form>
+                                </li>
+                            </ul>
+                        </div>
+                        <!-- /.navbar-collapse -->
+                    </div>
+                    <!-- /.container-fluid -->
+                </nav>
+                <div id="alerter">
 
-    </div>
-    <div class="chartholder">
-        <canvas id="myChart"></canvas>
+                </div>
+                <div class="chartholder">
+                    <canvas id="myChart"></canvas>
+                </div>
+            </div>
+        </div>
     </div>
 </body>
 
