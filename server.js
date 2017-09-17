@@ -38,13 +38,15 @@ particle.login({
   		       fs.appendFileSync(__dirname + '/log.txt', JSON.stringify(data) + "\n");
                     } catch (ex) {
                         // catch JSON parsing errors so your app doesn't crash
-console.log(ex);
+console.log("got an exception where:" + ex);
                     }
-                });
-	});
+                 });
+        }).catch(err => {
+       console.log("go an exception there: " + err);
+      });
     }).catch(err => {
-    throw err;
-});
+     console.log("go an exception here: " + err);
+     });
 
 app.get('/data', function(req, res) {
 	var array = fs.readFileSync(__dirname + '/log.txt').toString().split("\n");

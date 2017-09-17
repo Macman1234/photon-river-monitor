@@ -130,8 +130,11 @@ $(document).ready(function() {
             //console.log("--->" + element + "<----");
 
             if (element && element.name === 'distance') {
+		if (element.data > 10)
+		{
                 chartData.laser.times.push(moment(element.published_at));
-                chartData.laser.data.push(element.data);
+                chartData.laser.data.push(101 - element.data);
+		}
             }
             if (element && element.name === 'batteryLevel') {
                 chartData.batt.times.push(moment(element.published_at));
@@ -167,7 +170,7 @@ $(document).ready(function() {
         updateBar();
         if (chartType === 'laser') {
             chartData.current = chartData.laser;
-            labelsToUse = ['distance', 'inches from top of sensor'];
+            labelsToUse = ['distance', 'inches from bottom of sensor'];
             myChart.data.datasets[0].backgroundColor = '#4A5CA5';
             myChart.data.datasets[0].borderColor = '#4A5CA5';
         }
