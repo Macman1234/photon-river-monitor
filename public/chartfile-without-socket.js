@@ -119,8 +119,6 @@ $(document).ready(function() {
 
     function updateData(msg, callback) {
         msg.forEach(function(element) {
-            //console.log("--->" + element + "<----");
-
             if (element && element.name === 'distance') {
                 if (element.data > 10) {
                     chartData.laser.times.push(moment(element.published_at));
