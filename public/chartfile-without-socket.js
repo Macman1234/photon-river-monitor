@@ -53,20 +53,12 @@ $(document).ready(function() {
         chartType = 'laser';
         updateChart();
     });
-    $("#rotary").on('click', function() {
-        chartType = 'rotary';
-        updateChart();
-    });
     $("#temp").on('click', function() {
         chartType = 'temp';
         updateChart();
     });
     $("#batt").on('click', function() {
         chartType = 'batt';
-        updateChart();
-    });
-    $("#multi").on('click', function() {
-        chartType = 'multi';
         updateChart();
     });
     var ctx = document.getElementById('myChart').getContext('2d');
@@ -130,28 +122,21 @@ $(document).ready(function() {
             //console.log("--->" + element + "<----");
 
             if (element && element.name === 'distance') {
-		if (element.data > 10)
-		{
-                chartData.laser.times.push(moment(element.published_at));
-                chartData.laser.data.push(101 - element.data);
-		}
+                if (element.data > 10) {
+                    chartData.laser.times.push(moment(element.published_at));
+                    chartData.laser.data.push(101 - element.data);
+                }
             }
             if (element && element.name === 'batteryLevel') {
                 chartData.batt.times.push(moment(element.published_at));
                 chartData.batt.data.push(element.data);
             }
             if (element && element.name === 'Temperature') {
-		if (element.data > 10 && element.data < 100)
-                {
-                  chartData.temp.times.push(moment(element.published_at));
-                  chartData.temp.data.push(element.data);
-  		}
+                if (element.data > 10 && element.data < 100) {
+                    chartData.temp.times.push(moment(element.published_at));
+                    chartData.temp.data.push(element.data);
+                }
             }
-            if (element && element.name === 'rotary') {
-                chartData.rotary.times.push(moment(element.published_at));
-                chartData.rotary.data.push(element.data);
-            }
-
         });
         callback();
     }

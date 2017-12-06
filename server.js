@@ -34,33 +34,32 @@ particle.login({
             stream.on('event', function(data) {
                 console.log("Event: %j", data);
                 try {
-               //        json = JSON.parse(data);
-  		       fs.appendFileSync(__dirname + '/log.txt', JSON.stringify(data) + "\n");
-                    } catch (ex) {
-                        // catch JSON parsing errors so your app doesn't crash
-console.log("got an exception where:" + ex);
-                    }
-                 });
+                    //        json = JSON.parse(data);
+                    fs.appendFileSync(__dirname + '/log.txt', JSON.stringify(data) + "\n");
+                } catch (ex) {
+                    // catch JSON parsing errors so your app doesn't crash
+                    console.log("got an exception where:" + ex);
+                }
+            });
         }).catch(err => {
-       console.log("go an exception there: " + err);
-      });
+            console.log("go an exception there: " + err);
+        });
     }).catch(err => {
-     console.log("go an exception here: " + err);
-     });
+    console.log("go an exception here: " + err);
+});
 
 app.get('/data', function(req, res) {
-	var array = fs.readFileSync(__dirname + '/log.txt').toString().split("\n");
-        var allData = [];
-        for (i in array)
-        {
-           try {
-                                json = JSON.parse(array[i]);
-			allData.push(json);
-           } catch (ex) {
-                        // catch JSON parsing errors so your app doesn't crash
-                    }
-       }
-        res.send(allData);
+    var array = fs.readFileSync(__dirname + '/log.txt').toString().split("\n");
+    var allData = [];
+    for (var i in array) {
+        try {
+            json = JSON.parse(array[i]);
+            allData.push(json);
+        } catch (ex) {
+            // catch JSON parsing errors so your app doesn't crash
+        }
+    }
+    res.send(allData);
 });
 
 io.on('connection', function(socket) {
@@ -72,16 +71,14 @@ io.on('connection', function(socket) {
 });
 
 
-try  {
-fs.watch(__dirname + '/log.txt', (type, name) => {
-    fs.readFile(__dirname + '/log.txt', (err, data) => {
-        if (err) throw err;
-        io.sockets.emit('update', data.toString());
-        //console.log("socket updated");
+try {
+    fs.watch(__dirname + '/log.txt', (type, name) => {
+        fs.readFile(__dirname + '/log.txt', (err, data) => {
+            if (err) throw err;
+            io.sockets.emit('update', data.toString());
+            //console.log("socket updated");
+        });
     });
-});
-}
-catch (ex)
-{
+} catch (ex) {
 
 }
