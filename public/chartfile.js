@@ -1,4 +1,5 @@
 var labelsToUse = [];
+var colorToUse = "";
 
 function getParameterByName(name, url) {
     if (!url) url = window.location.href;
@@ -11,7 +12,7 @@ function getParameterByName(name, url) {
 }
 var chartType = getParameterByName('type');
 
-var alert = '<div class="alert alert-warning alert-dismissible fade in" role="alert"><button type="button" class="close" data-dismiss="alert"><span>&times;</span></button><strong>Warning!</strong> The value you selected was out of range.</div>';
+var alert = '<div class="alert alert-warning alert-dismissible fade in" role="alert"><button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button><strong>Warning!</strong> The value you selected was out of range.</div>';
 
 var pickedmin;
 var pickedmax;
@@ -19,7 +20,11 @@ var pickedmax;
 var isfirst = true;
 
 $(document).ready(function() {
-    $('#minpicker').datetimepicker();
+    $.getJSON("data", function(data) {
+        updateData(data[0], updateChart);
+    });
+
+    /*$('#minpicker').datetimepicker();
     $('#maxpicker').datetimepicker({
         useCurrent: false //Important! See issue #1075
     });
@@ -42,15 +47,11 @@ $(document).ready(function() {
     });
     $("#maxpicker").on("dp.error", function(e) {
         $("#alerter").append(alert);
-    });
+    });*/
 
     updateBar();
     $("#laser").on('click', function() {
         chartType = 'laser';
-        updateChart();
-    });
-    $("#rotary").on('click', function() {
-        chartType = 'rotary';
         updateChart();
     });
     $("#temp").on('click', function() {
@@ -61,97 +62,47 @@ $(document).ready(function() {
         chartType = 'batt';
         updateChart();
     });
-    $("#multi").on('click', function() {
-        chartType = 'multi';
-        updateChart();
-    });
-    var ctx = document.getElementById('myChart').getContext('2d');
-    var myChart = new Chart(ctx, {
-        type: 'line',
-        data: {
-            labels: [0],
-            datasets: [{
-                fill: false,
-                label: "",
-                data: [0],
-                backgroundColor: '#1375d0',
-                borderColor: '#1375d0'
-            }]
-        },
-        options: {
-            scales: {
-                xAxes: [{
-                    type: "time",
-                    time: {
-                        format: 'MM/DD/YYYY hh:mm a',
-                        tooltipFormat: 'll hh:mm a'
-                    },
-                    scaleLabel: {
-                        display: true,
-                        labelString: 'Date'
-                    }
-                }, ],
-                yAxes: [{
-                    scaleLabel: {
-                        display: true,
-                        labelString: ""
-                    }
-                }]
-            },
-        }
-    });
 
-    var chartData = {
-        laser: {
-            data: [],
-            times: []
-        },
-        rotary: {
-            data: [],
-            times: []
-        },
-        temp: {
-            data: [],
-            times: []
-        },
-        batt: {
-            data: [],
-            times: []
+    var g = new Dygraph(
+        document.getElementById("div_g"), [
+            [0, 0]
+        ], {
+            //labels: ['test', 'test'],
+            drawPoints: true,
+            legend: 'always',
+            showRangeSelector: true,
+            //title: '',
+            color: '#F3A712',
+            labelsDiv: document.getElementById('legend'),
         }
+    );
+
+    var blankDataFormat = {
+        laser: [],
+        temp: [],
+        batt: []
     };
-
-    var socket = io.connect();
-    socket.on('connect', function() {
-        socket.on('begin', function(data) {
-            console.log(data);
-            data = JSON.parse(data);
-            updateData(data, updateChart);
-        });
-
-        socket.on('update', function(msg) {
-            console.log('an update happened');
-        });
-    });
+    var chartData = blankDataFormat;
 
     function updateData(msg, callback) {
         msg.forEach(function(element) {
-            //console.log("--->" + element + "<----");
-
             if (element && element.name === 'distance') {
-                chartData.laser.times.push(moment(element.published_at));
-                chartData.laser.data.push(element.data);
+                if (element.data > 10 && element.data < 110) {
+                    //chartData.laser.times.push(moment(element.published_at));
+                    chartData.laser.push([new Date(element.published_at), 101 - element.data]);
+                }
             }
             if (element && element.name === 'batteryLevel') {
-                chartData.batt.times.push(moment(element.published_at));
-                chartData.batt.data.push(element.data);
+                //chartData.batt.times.push(moment(element.published_at));
+                chartData.batt.push([new Date(element.published_at), element.data - 0]);
+                //chartData.batt.data.push(element.data);
             }
             if (element && element.name === 'Temperature') {
-                chartData.temp.times.push(moment(element.published_at));
-                chartData.temp.data.push(element.data);
-            }
-            if (element && element.name === 'rotary') {
-                chartData.rotary.times.push(moment(element.published_at));
-                chartData.rotary.data.push(element.data);
+                if (element.data > 10 && element.data < 100) {
+                    //chartData.temp.times.push(moment(element.published_at));
+                    chartData.temp.push([new Date(element.published_at), element.data - 0]);
+                    //chartData.temp.data.push(element.data);
+                }
             }
         });
         callback();
@@ -171,46 +122,52 @@ $(document).ready(function() {
         updateBar();
         if (chartType === 'laser') {
             chartData.current = chartData.laser;
-            labelsToUse = ['distance', 'inches from top of sensor'];
-            myChart.data.datasets[0].backgroundColor = '#4A5CA5';
-            myChart.data.datasets[0].borderColor = '#4A5CA5';
+            labelsToUse = ['distance', 'inches from bottom of sensor'];
+            colorToUse = '#4A5CA5';
+            //myChart.data.datasets[0].borderColor = '#4A5CA5';
         }
         if (chartType === 'batt') {
             chartData.current = chartData.batt;
             labelsToUse = ['battery level', 'volts'];
-            myChart.data.datasets[0].backgroundColor = '#F3A712';
-            myChart.data.datasets[0].borderColor = '#F3A712';
+            colorToUse = '#F3A712';
+            //myChart.data.datasets[0].borderColor = '#F3A712';
         }
         if (chartType === 'temp') {
             chartData.current = chartData.temp;
-            labelsToUse = ['tempurature', 'degrees F'];
-            myChart.data.datasets[0].backgroundColor = '#E4572E';
-            myChart.data.datasets[0].borderColor = '#E4572E';
-        }
-        if (chartType === 'rotary') {
-            chartData.current = chartData.rotary;
-            labelsToUse = ['rotary sensor', 'angle in degrees'];
-            myChart.data.datasets[0].backgroundColor = '#4A5CA5';
-            myChart.data.datasets[0].borderColor = '#4A5CA5';
+            labelsToUse = ['temperature', 'degrees F'];
+            colorToUse = '#E4572E';
+            //myChart.data.datasets[0].backgroundColor = '#E4572E';
+            //myChart.data.datasets[0].borderColor = '#E4572E';
         }
 
         if (isfirst) {
-            $('#minpicker').data("DateTimePicker").date(moment.min(chartData.current.times));
-            $('#maxpicker').data("DateTimePicker").date(moment.max(chartData.current.times));
-            $("#chartholder").removeClass("loading");
+            //$('#minpicker').data("DateTimePicker").date(moment.min(chartData.current.times));
+            //$('#maxpicker').data("DateTimePicker").date(moment.max(chartData.current.times));
+            $("#loading").remove();
+            g.updateOptions({
+                'file': chartData.current,
+                'color': colorToUse,
+                'labels': labelsToUse
+            });
             isfirst = false;
         }
 
-        $('#minpicker').data("DateTimePicker").minDate(moment.min(chartData.current.times).subtract(1, 'minutes'));
-        $('#maxpicker').data("DateTimePicker").maxDate(moment.max(chartData.current.times));
+        //$('#minpicker').data("DateTimePicker").minDate(moment.min(chartData.current.times).subtract(1, 'minutes'));
+        //$('#maxpicker').data("DateTimePicker").maxDate(moment.max(chartData.current.times));
 
-        myChart.options.scales.xAxes[0].time.min = pickedmin;
-        myChart.options.scales.xAxes[0].time.max = pickedmax;
+        //myChart.options.scales.xAxes[0].time.min = pickedmin;
+        //myChart.options.scales.xAxes[0].time.max = pickedmax;
 
-        myChart.data.labels = chartData.current.times;
-        myChart.data.datasets[0].data = chartData.current.data;
-        myChart.data.datasets[0].label = labelsToUse[0];
-        myChart.options.scales.yAxes[0].scaleLabel.labelString = labelsToUse[1];
-        myChart.update();
+        //myChart.data.labels = chartData.current.times;
+        //myChart.data.datasets[0].data = chartData.current.data;
+        console.log(chartData.current);
+        g.updateOptions({
+            'file': chartData.current,
+            'color': colorToUse,
+            'labels': labelsToUse
+        });
+        //myChart.data.datasets[0].label = labelsToUse[0];
+        //myChart.options.scales.yAxes[0].scaleLabel.labelString = labelsToUse[1];
+        //myChart.update();
     }
 });
