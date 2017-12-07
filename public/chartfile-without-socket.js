@@ -24,7 +24,7 @@ $(document).ready(function() {
         updateData(data[0], updateChart);
     });
 
-    $('#minpicker').datetimepicker();
+    /*$('#minpicker').datetimepicker();
     $('#maxpicker').datetimepicker({
         useCurrent: false //Important! See issue #1075
     });
@@ -47,7 +47,7 @@ $(document).ready(function() {
     });
     $("#maxpicker").on("dp.error", function(e) {
         $("#alerter").append(alert);
-    });
+    });*/
 
     updateBar();
     $("#laser").on('click', function() {
@@ -64,16 +64,16 @@ $(document).ready(function() {
     });
 
     var g = new Dygraph(
-        document.getElementById("noroll"), [
-            [0]
+        document.getElementById("div_g"), [
+            [0, 0]
         ], {
-            labels: ["X", " "],
+            //labels: ['test', 'test'],
             drawPoints: true,
             legend: 'always',
             showRangeSelector: true,
-            animatedZooms: true,
-            title: 'dygraphs chart template',
-            color: '#F3A712'
+            //title: '',
+            color: '#F3A712',
+            labelsDiv: document.getElementById('legend'),
         }
     );
 
@@ -135,7 +135,7 @@ $(document).ready(function() {
         if (chartType === 'temp') {
             chartData.current = chartData.temp;
             labelsToUse = ['temperature', 'degrees F'];
-            colorToUse = '#E4572E'
+            colorToUse = '#E4572E';
             //myChart.data.datasets[0].backgroundColor = '#E4572E';
             //myChart.data.datasets[0].borderColor = '#E4572E';
         }
@@ -147,7 +147,7 @@ $(document).ready(function() {
             g.updateOptions({
                 'file': chartData.current,
                 'color': colorToUse,
-                'label': labelsToUse
+                'labels': labelsToUse
             });
             isfirst = false;
         }
@@ -163,7 +163,8 @@ $(document).ready(function() {
         console.log(chartData.current);
         g.updateOptions({
             'file': chartData.current,
-            'color': colorToUse
+            'color': colorToUse,
+            'labels': labelsToUse
         });
         //myChart.data.datasets[0].label = labelsToUse[0];
         //myChart.options.scales.yAxes[0].scaleLabel.labelString = labelsToUse[1];
