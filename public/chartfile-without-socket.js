@@ -20,7 +20,7 @@ var isfirst = true;
 
 $(document).ready(function() {
     $.getJSON("data", function(data) {
-        updateData(data, updateChart);
+        updateData(data[0], updateChart);
     });
 
     $('#minpicker').datetimepicker();
