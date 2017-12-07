@@ -1,4 +1,5 @@
 var labelsToUse = [];
+var colorToUse = "";
 
 function getParameterByName(name, url) {
     if (!url) url = window.location.href;
@@ -71,7 +72,8 @@ $(document).ready(function() {
             legend: 'always',
             showRangeSelector: true,
             animatedZooms: true,
-            title: 'dygraphs chart template'
+            title: 'dygraphs chart template',
+            color: '#F3A712'
         }
     );
 
@@ -121,18 +123,19 @@ $(document).ready(function() {
         if (chartType === 'laser') {
             chartData.current = chartData.laser;
             labelsToUse = ['distance', 'inches from bottom of sensor'];
-            //myChart.data.datasets[0].backgroundColor = '#4A5CA5';
+            colorToUse = '#4A5CA5';
             //myChart.data.datasets[0].borderColor = '#4A5CA5';
         }
         if (chartType === 'batt') {
             chartData.current = chartData.batt;
             labelsToUse = ['battery level', 'volts'];
-            //myChart.data.datasets[0].backgroundColor = '#F3A712';
+            colorToUse = '#F3A712';
             //myChart.data.datasets[0].borderColor = '#F3A712';
         }
         if (chartType === 'temp') {
             chartData.current = chartData.temp;
-            labelsToUse = ['tempurature', 'degrees F'];
+            labelsToUse = ['temperature', 'degrees F'];
+            colorToUse = '#E4572E'
             //myChart.data.datasets[0].backgroundColor = '#E4572E';
             //myChart.data.datasets[0].borderColor = '#E4572E';
         }
@@ -142,7 +145,9 @@ $(document).ready(function() {
             //$('#maxpicker').data("DateTimePicker").date(moment.max(chartData.current.times));
             $("#loading").remove();
             g.updateOptions({
-                'file': chartData.current
+                'file': chartData.current,
+                'color': colorToUse,
+                'label': labelsToUse
             });
             isfirst = false;
         }
@@ -157,7 +162,8 @@ $(document).ready(function() {
         //myChart.data.datasets[0].data = chartData.current.data;
         console.log(chartData.current);
         g.updateOptions({
-            'file': chartData.current
+            'file': chartData.current,
+            'color': colorToUse
         });
         //myChart.data.datasets[0].label = labelsToUse[0];
         //myChart.options.scales.yAxes[0].scaleLabel.labelString = labelsToUse[1];
