@@ -102,10 +102,6 @@ $(document).ready(function() {
             data: [],
             times: []
         },
-        rotary: {
-            data: [],
-            times: []
-        },
         temp: {
             data: [],
             times: []
@@ -168,12 +164,6 @@ $(document).ready(function() {
             labelsToUse = ['tempurature', 'degrees F'];
             myChart.data.datasets[0].backgroundColor = '#E4572E';
             myChart.data.datasets[0].borderColor = '#E4572E';
-        }
-        if (chartType === 'rotary') {
-            chartData.current = chartData.rotary;
-            labelsToUse = ['rotary sensor', 'angle in degrees'];
-            myChart.data.datasets[0].backgroundColor = '#4A5CA5';
-            myChart.data.datasets[0].borderColor = '#4A5CA5';
         }
 
         if (isfirst) {
