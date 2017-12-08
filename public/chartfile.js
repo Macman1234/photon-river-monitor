@@ -14,9 +14,6 @@ var chartType = getParameterByName('type');
 
 var alert = '<div class="alert alert-warning alert-dismissible fade in" role="alert"><button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button><strong>Warning!</strong> The value you selected was out of range.</div>';
 
-var pickedmin;
-var pickedmax;
-
 var isfirst = true;
 
 $(document).ready(function() {
@@ -74,6 +71,8 @@ $(document).ready(function() {
             //title: '',
             color: '#F3A712',
             labelsDiv: document.getElementById('legend'),
+            strokeWidth: 1.5,
+            rollPeriod: 5,
         }
     );
 
@@ -88,20 +87,15 @@ $(document).ready(function() {
         msg.forEach(function(element) {
             if (element && element.name === 'distance') {
                 if (element.data > 10 && element.data < 110) {
-                    //chartData.laser.times.push(moment(element.published_at));
                     chartData.laser.push([new Date(element.published_at), 101 - element.data]);
                 }
             }
             if (element && element.name === 'batteryLevel') {
-                //chartData.batt.times.push(moment(element.published_at));
                 chartData.batt.push([new Date(element.published_at), element.data - 0]);
-                //chartData.batt.data.push(element.data);
             }
             if (element && element.name === 'Temperature') {
                 if (element.data > 10 && element.data < 100) {
-                    //chartData.temp.times.push(moment(element.published_at));
                     chartData.temp.push([new Date(element.published_at), element.data - 0]);
-                    //chartData.temp.data.push(element.data);
                 }
             }
         });
@@ -124,50 +118,36 @@ $(document).ready(function() {
             chartData.current = chartData.laser;
             labelsToUse = ['distance', 'inches from bottom of sensor'];
             colorToUse = '#4A5CA5';
-            //myChart.data.datasets[0].borderColor = '#4A5CA5';
         }
         if (chartType === 'batt') {
             chartData.current = chartData.batt;
             labelsToUse = ['battery level', 'volts'];
             colorToUse = '#F3A712';
-            //myChart.data.datasets[0].borderColor = '#F3A712';
         }
         if (chartType === 'temp') {
             chartData.current = chartData.temp;
             labelsToUse = ['temperature', 'degrees F'];
             colorToUse = '#E4572E';
-            //myChart.data.datasets[0].backgroundColor = '#E4572E';
-            //myChart.data.datasets[0].borderColor = '#E4572E';
         }
 
         if (isfirst) {
-            //$('#minpicker').data("DateTimePicker").date(moment.min(chartData.current.times));
-            //$('#maxpicker').data("DateTimePicker").date(moment.max(chartData.current.times));
             $("#loading").remove();
+            var maxtimestamp = chartData.current[chartData.current.length - 1][0].getTime();
+            var weekagotimestamp = chartData.current[chartData.current.length - 1][0].getTime() - 604800000;
             g.updateOptions({
                 'file': chartData.current,
                 'color': colorToUse,
-                'labels': labelsToUse
+                'labels': labelsToUse,
+                'dateWindow': [weekagotimestamp, maxtimestamp]
             });
             isfirst = false;
         }
 
-        //$('#minpicker').data("DateTimePicker").minDate(moment.min(chartData.current.times).subtract(1, 'minutes'));
-        //$('#maxpicker').data("DateTimePicker").maxDate(moment.max(chartData.current.times));
-
-        //myChart.options.scales.xAxes[0].time.min = pickedmin;
-        //myChart.options.scales.xAxes[0].time.max = pickedmax;
-
-        //myChart.data.labels = chartData.current.times;
-        //myChart.data.datasets[0].data = chartData.current.data;
-        console.log(chartData.current);
         g.updateOptions({
             'file': chartData.current,
             'color': colorToUse,
             'labels': labelsToUse
         });
-        //myChart.data.datasets[0].label = labelsToUse[0];
-        //myChart.options.scales.yAxes[0].scaleLabel.labelString = labelsToUse[1];
-        //myChart.update();
+
     }
 });
