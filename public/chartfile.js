@@ -10,6 +10,35 @@ function getParameterByName(name, url) {
     if (!results[2]) return '';
     return decodeURIComponent(results[2].replace(/\+/g, " "));
 }
+
+function pad(n, width, z) {
+    z = z || '0';
+    n = n + '';
+    return n.length >= width ? n : new Array(width - n.length + 1).join(z) + n;
+}
+
+function formatDate(d) {
+    var yy = d.getFullYear(),
+        MM = d.getMonth(),
+        dd = d.getDate(),
+        mm = d.getMinutes(),
+        hh = d.getHours();
+    if (hh > 11) {
+        m = "PM";
+    } else {
+        m = "AM";
+    }
+    if (hh > 13 && hh) {
+        hh = hh - 12;
+    }
+    if (hh < 1) {
+        hh = 12;
+    }
+    mm = pad(mm, 2);
+    hh = pad(hh, 2);
+    return hh + ":" + mm + " " + m + " " + MM + "/" + dd + "/" + yy;
+}
+
 var chartType = getParameterByName('type');
 
 var alert = '<div class="alert alert-warning alert-dismissible fade in" role="alert"><button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button><strong>Warning!</strong> The value you selected was out of range.</div>';
@@ -20,31 +49,6 @@ $(document).ready(function() {
     $.getJSON("data", function(data) {
         updateData(data[0], updateChart);
     });
-
-    /*$('#minpicker').datetimepicker();
-    $('#maxpicker').datetimepicker({
-        useCurrent: false //Important! See issue #1075
-    });
-    $("#minpicker").on("dp.change", function(e) {
-        $('#maxpicker').data("DateTimePicker").minDate(e.date);
-        pickedmin = e.date;
-        if (!isfirst) {
-            updateChart();
-        }
-    });
-    $("#maxpicker").on("dp.change", function(e) {
-        $('#minpicker').data("DateTimePicker").maxDate(e.date);
-        pickedmax = e.date;
-        if (!isfirst) {
-            updateChart();
-        }
-    });
-    $("#minpicker").on("dp.error", function(e) {
-        $("#alerter").append(alert);
-    });
-    $("#maxpicker").on("dp.error", function(e) {
-        $("#alerter").append(alert);
-    });*/
 
     updateBar();
     $("#laser").on('click', function() {
@@ -73,6 +77,14 @@ $(document).ready(function() {
             labelsDiv: document.getElementById('legend'),
             strokeWidth: 1.5,
             rollPeriod: 5,
+            axes: {
+                x: {
+                    valueFormatter: function(ms) {
+                        return formatDate(new Date(ms));
+                    },
+                }
+
+            }
         }
     );
 
