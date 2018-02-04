@@ -11,34 +11,6 @@ function getParameterByName(name, url) {
     return decodeURIComponent(results[2].replace(/\+/g, " "));
 }
 
-function pad(n, width, z) {
-    z = z || '0';
-    n = n + '';
-    return n.length >= width ? n : new Array(width - n.length + 1).join(z) + n;
-}
-
-function formatDate(d) {
-    var yy = d.getFullYear(),
-        MM = d.getMonth(),
-        dd = d.getDate(),
-        mm = d.getMinutes(),
-        hh = d.getHours();
-    if (hh > 11) {
-        m = "PM";
-    } else {
-        m = "AM";
-    }
-    if (hh > 13 && hh) {
-        hh = hh - 12;
-    }
-    if (hh < 1) {
-        hh = 12;
-    }
-    mm = pad(mm, 2);
-    hh = pad(hh, 2);
-    return hh + ":" + mm + " " + m + " " + MM + "/" + dd + "/" + yy;
-}
-
 var chartType = getParameterByName('type');
 
 var alert = '<div class="alert alert-warning alert-dismissible fade in" role="alert"><button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button><strong>Warning!</strong> The value you selected was out of range.</div>';
@@ -64,29 +36,25 @@ $(document).ready(function() {
         updateChart();
     });
 
-    var g = new Dygraph(
-        document.getElementById("div_g"), [
-            [0, 0]
-        ], {
-            //labels: ['test', 'test'],
-            drawPoints: true,
-            legend: 'always',
-            showRangeSelector: true,
-            //title: '',
-            color: '#F3A712',
-            labelsDiv: document.getElementById('legend'),
-            strokeWidth: 1.5,
-            rollPeriod: 5,
-            axes: {
-                x: {
-                    valueFormatter: function(ms) {
-                        return formatDate(new Date(ms));
-                    },
-                }
+    var chart = Highcharts.stockChart('chart', {
 
+        rangeSelector: {
+            selected: 1
+        },
+
+        title: {
+            text: ''
+        },
+
+        series: [{
+            //gapSize: 4,
+            name: '',
+            data: 0,
+            tooltip: {
+                valueDecimals: 2
             }
-        }
-    );
+        }]
+    });
 
     var blankDataFormat = {
         laser: [],
@@ -144,22 +112,42 @@ $(document).ready(function() {
 
         if (isfirst) {
             $("#loading").remove();
-            var maxtimestamp = chartData.current[chartData.current.length - 1][0].getTime();
-            var weekagotimestamp = chartData.current[chartData.current.length - 1][0].getTime() - 604800000;
-            g.updateOptions({
-                'file': chartData.current,
-                'color': colorToUse,
-                'labels': labelsToUse,
-                'dateWindow': [weekagotimestamp, maxtimestamp]
-            });
+            //var maxtimestamp = chartData.current[chartData.current.length - 1][0].getTime();
+            //var weekagotimestamp = chartData.current[chartData.current.length - 1][0].getTime() - 604800000;
             isfirst = false;
         }
+        var linesToPlot = [];
+        //console.log(chart.closestPointRange);
+        for (var i = 0; i < chartData.current.length - 1; i++) {
+            //console.log(chartData.current[i + 1][0] - chartData.current[i][0]);
+            if (chartData.current[i + 1][0] - chartData.current[i][0] > 86400000) {
+                console.log("gap at  " + chartData.current[i][0]);
+                linesToPlot.push({
+                    value: chartData.current[i][0],
+                    width: 1,
+                    color: 'black',
+                    dashStyle: 'dash',
+                    label: {
+                        text: 'gap'
+                    }
+                });
+            }
+        }
 
-        g.updateOptions({
-            'file': chartData.current,
-            'color': colorToUse,
-            'labels': labelsToUse
+
+        chart.update({
+            title: {
+                text: labelsToUse[0]
+            },
+            series: [{
+                name: labelsToUse[0],
+                data: chartData.current,
+                color: colorToUse
+            }],
+            xAxis: {
+                plotLines: linesToPlot
+            }
+
         });
-
     }
 });
